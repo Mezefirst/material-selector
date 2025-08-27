@@ -2,7 +2,7 @@ import axios from 'axios';
 
 function RecommendMaterial({ input }) {
   const handleClick = async () => {
-    const res = await axios.post('/recommend', input);
+    const res = await axios.post('http://localhost:5000/recommend', input);
     alert(`Recommended: ${res.data.recommended_material}`);
   };
 
