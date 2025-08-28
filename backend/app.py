@@ -3,23 +3,26 @@ from flask_cors import CORS
 import joblib
 import pandas as pd
 import os
-import cloudpickle
 
 app = Flask(__name__)
 CORS(app)
 
-with open(model_path, 'rb') as f:
-    model = cloudpickle.load(f)
-    
+# Define base directory
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+# Load model and scaler from ai folder
+model_path = os.path.join(base_dir, '..', 'ai', 'model.pkl')
+scaler_path = os.path.join(base_dir, '..', 'ai', 'scaler.pkl')
+
+# Check if files exist
 if not os.path.exists(model_path):
     raise FileNotFoundError(f"Model file not found at {model_path}")
+if not os.path.exists(scaler_path):
+    raise FileNotFoundError(f"Scaler file not found at {scaler_path}")
 
-base_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join('backend', 'model.pkl')
+# Load model and scaler
 model = joblib.load(model_path)
-
-model = joblib.load("../ai/model.pkl")
-scaler = joblib.load("../ai/scaler.pkl")
+scaler = joblib.load(scaler_path)
 
 @app.route("/recommend", methods=["POST"])
 def recommend():
@@ -28,3 +31,4 @@ def recommend():
     input_scaled = scaler.transform(input_df)
     prediction = model.predict(input_scaled)
     return jsonify({"recommended_material": prediction[0]})
+
