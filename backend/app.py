@@ -3,8 +3,13 @@ from flask_cors import CORS
 import joblib
 import pandas as pd
 import os
+import cloudpickle
+
 app = Flask(__name__)
 CORS(app)
+
+with open(model_path, 'rb') as f:
+    model = cloudpickle.load(f)
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join(base_dir, '..', 'ai', 'model.pkl')
