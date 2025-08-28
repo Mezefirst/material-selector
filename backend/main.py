@@ -3,9 +3,17 @@ from pydantic import BaseModel
 from typing import List, Optional
 from services.recommender import recommend_materials, suggest_alternatives, simulate_tradeoff
 from services.nlp import parse_user_query
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
 
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For development, or specify your frontend origin in production
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 class Material(BaseModel):
     name: str
     strength: float
