@@ -5,8 +5,8 @@ import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
-model = joblib.load("ai/model.pkl")
-scaler = joblib.load("ai/scaler.pkl")
+model = joblib.load("backend/model.pkl")
+scaler = joblib.load("scaler.pkl")
 
 @app.route("/recommend", methods=["POST"])
 def recommend():
