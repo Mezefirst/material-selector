@@ -10,6 +10,9 @@ CORS(app)
 
 with open(model_path, 'rb') as f:
     model = cloudpickle.load(f)
+    
+if not os.path.exists(model_path):
+    raise FileNotFoundError(f"Model file not found at {model_path}")
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 model_path = os.path.join('backend', 'model.pkl')
