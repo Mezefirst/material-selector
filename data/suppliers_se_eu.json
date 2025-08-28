@@ -1,0 +1,16 @@
+[
+  {
+    "name": "AB Svensk Material",
+    "contact_email": "info@svenskmaterial.se",
+    "region": "Sweden",
+    "is_local": true,
+    "materials": ["Steel S355", "Aluminum 6061"]
+  },
+  {
+    "name": "EuroMat AB",
+    "contact_email": "sales@euromat.eu",
+    "region": "EU",
+    "is_local": true,
+    "materials": ["Copper C101", "Polycarbonate"]
+  }
+]
