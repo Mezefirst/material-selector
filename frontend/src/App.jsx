@@ -4,8 +4,9 @@ function App() {
   const sampleInput = {
     cost_per_kg: 2.5,
     tensile_strength: 300,
-    thermal_conductivity: 150,
-    carbon_footprint: 5.0
+    // You can add more fields as needed
+    // sustainability: 6,
+    // etc.
   };
 
   return (
