@@ -12,7 +12,7 @@ with open(model_path, 'rb') as f:
     model = cloudpickle.load(f)
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
-model_path = os.path.join(base_dir, '..', 'ai', 'model.pkl')
+model_path = os.path.join('backend', 'model.pkl')
 model = joblib.load(model_path)
 
 model = joblib.load("../ai/model.pkl")
