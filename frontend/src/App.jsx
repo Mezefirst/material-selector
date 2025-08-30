@@ -10,8 +10,11 @@ function App() {
   };
 
   return (
-    <div>
+    <div className="container">
       <h1>Material Selector</h1>
+      <p style={{textAlign: 'center', color: '#7f8c8d', marginBottom: '30px'}}>
+        Find sustainable materials for your engineering projects
+      </p>
       <RecommendMaterial input={sampleInput} />
     </div>
   );
