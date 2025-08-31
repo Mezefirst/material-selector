@@ -5,6 +5,28 @@ import {
 } from '@mui/material';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CompareIcon from '@mui/icons-material/Compare';
+import React, { useState } from 'react';
+import AdvancedMaterialSearch from './components/AdvancedMaterialSearch';
+import { Container, Typography, Grid } from '@mui/material';
+import MaterialCard from './components/MaterialCard';
+
+export default function App() {
+  const [materials, setMaterials] = useState([]);
+
+  return (
+    <Container>
+      <Typography variant="h4" sx={{ mt: 4 }}>Material Selector</Typography>
+      <AdvancedMaterialSearch onResults={setMaterials} />
+      <Grid container spacing={2} sx={{ mt: 2 }}>
+        {materials.map(m => (
+          <Grid item key={m.id} xs={12} md={6} lg={4}>
+            <MaterialCard material={m} />
+          </Grid>
+        ))}
+      </Grid>
+    </Container>
+  );
+}
 
 const materials = [
   {
