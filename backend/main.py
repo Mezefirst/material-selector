@@ -7,7 +7,14 @@ from services.nlp import parse_user_query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi import APIRouter
 from services.external_sources import fetch_matweb_materials, fetch_material_project_materials
+from fastapi import FastAPI
+from backend.routes.material import router as material_router
+from backend.database import engine, Base
 
+Base.metadata.create_all(bind=engine)
+
+app = FastAPI()
+app.include_router(material_router)
 
 
 app = FastAPI(title="Material Selector API", version="1.0.0")
