@@ -14,10 +14,15 @@
     "deploy:netlify": "netlify deploy --prod --dir=build"
   },
   "dependencies": {
+<<<<<<< HEAD
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.1",
     "@mui/icons-material": "^5.11.0",
     "@mui/material": "^5.0.0",
+=======
+    "@mui/material": "^7.3.1",
+    "@mui/icons-material": "^7.3.1",
+>>>>>>> 5533d42f4879325bebde824287b0c45e517627e6
     "axios": "^1.6.7",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
@@ -36,3 +41,4 @@
     ]
   }
 }
+
