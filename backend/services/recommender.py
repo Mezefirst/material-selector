@@ -1,8 +1,23 @@
 from typing import List, Dict
 # Import AI logic from ai_recommender.py (as previously discussed)
 from ai_recommender import filter_materials, find_alternatives, simulate_tradeoff
+import joblib
+import numpy as np
 
-# Extend rule-based logic as needed
+# Load pre-trained models (assuming you have .joblib files)
+xgb_model = joblib.load("models/xgb_recommender.joblib")
+nn_model = joblib.load("models/nn_recommender.joblib")
+
+def recommend_materials_ml(features, model_type="xgb"):
+    if model_type == "xgb":
+        preds = xgb_model.predict(features)
+    elif model_type == "nn":
+        preds = nn_model.predict(features)
+    else:
+        raise ValueError("Unknown model type")
+    return preds
+
+
 def recommend_materials(filters):
     # Example: filter locally; replace with DB queries as needed
     from backend.data.materials import MATERIALS
@@ -24,6 +39,23 @@ def recommend_materials(filters):
         results = [m for m in results if query in m["name"].lower() or query in m.get("properties", "").lower() or query in m.get("description", "").lower()]
     return results
     
+from backend.services.nlp import parse_query_nlp
+
+def recommend_materials(filters, query=None, model_type="xgb"):
+    # NLP parsing
+    if query:
+        nlp_filters = parse_query_nlp(query)
+        filters.update(nlp_filters)
+    # Build feature vector from filters
+    features = np.array([filters.get("strength", 0), filters.get("cost", 0), filters.get("sustainability", 0)])
+    # ML-based recommendation
+    material_ids = recommend_materials_ml(features.reshape(1, -1), model_type)
+    # Retrieve material details
+    from backend.data.materials import MATERIALS
+    results = [m for m in MATERIALS if m["id"] in material_ids]
+    return results
+    
+# Extend rule-based logic as needed    
 def recommend_materials(filters: Dict):
     # Load materials from DB in a real implementation
     materials = [
