@@ -16,7 +16,8 @@ function RecommendMaterial({ input }) {
         // You can add other mappings as needed
         // e.g., min_sustainability: input.sustainability
       };
-      const res = await axios.post('http://localhost:8000/recommend', filters); // port 8000 for FastAPI
+      const apiUrl = process.env.REACT_APP_API_URL || 'http://localhost:8000';
+      const res = await axios.post(`${apiUrl}/recommend`, filters);
       setRecommendations(res.data);
     } catch (err) {
       setError('Failed to get recommendations. Please check your backend and input.');
@@ -25,16 +26,22 @@ function RecommendMaterial({ input }) {
 
   return (
     <div>
-      <button onClick={handleClick}>Get Recommendation</button>
-      {error && <p style={{color: 'red'}}>{error}</p>}
+      <div style={{textAlign: 'center'}}>
+        <button onClick={handleClick}>Get Material Recommendation</button>
+      </div>
+      {error && <p className="error">{error}</p>}
       {recommendations.length > 0 && (
-        <ul>
-          {recommendations.map((mat, i) => (
-            <li key={i}>
-              <b>{mat.name}</b> (Strength: {mat.strength}, Cost: {mat.cost}, Sustainability: {mat.sustainability})
-            </li>
-          ))}
-        </ul>
+        <div className="recommendations">
+          <h3>Recommended Materials:</h3>
+          <ul>
+            {recommendations.map((mat, i) => (
+              <li key={i}>
+                <b>{mat.name}</b><br/>
+                <span>Strength: {mat.strength} MPa | Cost: ${mat.cost}/kg | Sustainability: {mat.sustainability}/10</span>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </div>
   );
