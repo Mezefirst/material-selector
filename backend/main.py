@@ -5,6 +5,10 @@ from typing import List, Optional
 from services.recommender import recommend_materials, suggest_alternatives, simulate_tradeoff
 from services.nlp import parse_user_query
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi import APIRouter
+from services.external_sources import fetch_matweb_materials, fetch_material_project_materials
+
+
 
 app = FastAPI(title="Material Selector API", version="1.0.0")
 
@@ -27,6 +31,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+router = APIRouter()
+
+@router.get("/external-materials")
+def get_external_materials(source: str, query: str):
+    if source == "matweb":
+        return fetch_matweb_materials(query)
+    elif source == "materials_project":
+        return fetch_material_project_materials(query)
+    return {"error": "Unknown source"}
+
 class Material(BaseModel):
     name: str
     strength: float
