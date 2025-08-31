@@ -14,7 +14,7 @@
     "deploy:netlify": "netlify deploy --prod --dir=build"
   },
   "dependencies": {
-    "@mui/material": "^5.0.0",
+    "@mui/material": "^7.3.1",
     "@mui/icons-material": "^7.3.1",
     "axios": "^1.6.7",
     "react": "^18.2.0",
