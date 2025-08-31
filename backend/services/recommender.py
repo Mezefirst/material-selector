@@ -3,6 +3,27 @@ from typing import List, Dict
 from ai_recommender import filter_materials, find_alternatives, simulate_tradeoff
 
 # Extend rule-based logic as needed
+def recommend_materials(filters):
+    # Example: filter locally; replace with DB queries as needed
+    from backend.data.materials import MATERIALS
+    results = MATERIALS
+
+    # Filter by types
+    if filters.get("types"):
+        results = [m for m in results if m["type"] in filters["types"]]
+    # Filter by colors
+    if filters.get("colors"):
+        results = [m for m in results if m["color"] in filters["colors"]]
+    # Range filters
+    results = [m for m in results if filters.get("min_strength", 0) <= m["strength"] <= filters.get("max_strength", 2000)]
+    results = [m for m in results if filters.get("min_cost", 0) <= m["cost"] <= filters.get("max_cost", 1000)]
+    results = [m for m in results if filters.get("min_sustainability", 0) <= m["sustainability"] <= filters.get("max_sustainability", 10)]
+    # Fuzzy search and full-text match
+    if filters.get("search"):
+        query = filters["search"].lower()
+        results = [m for m in results if query in m["name"].lower() or query in m.get("properties", "").lower() or query in m.get("description", "").lower()]
+    return results
+    
 def recommend_materials(filters: Dict):
     # Load materials from DB in a real implementation
     materials = [
