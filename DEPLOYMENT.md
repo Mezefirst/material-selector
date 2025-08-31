@@ -141,3 +141,20 @@ For deployment issues:
 2. Verify environment variables
 3. Test API endpoints individually
 4. Check CORS configuration
+
+   
+# Deployment Guide
+
+## Docker & Docker Compose
+- Build and run locally: `docker-compose up --build`
+- Access backend: http://localhost:8000
+- Access frontend: http://localhost:3000
+
+## Cloud Hosting
+- Frontend: [Vercel](https://vercel.com/) / [Netlify](https://netlify.com/)
+- Backend: [Railway](https://railway.app/) / [Heroku](https://heroku.com/)
+- Database: Managed PostgreSQL or cloud database service.
+
+## CI/CD
+- Continuous integration and deployment via GitHub Actions.
+- Automated tests and Docker builds on push.
