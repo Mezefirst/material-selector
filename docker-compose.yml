@@ -5,8 +5,12 @@ services:
     build: ./backend
     ports:
       - "8000:8000"
+<<<<<<< HEAD
     env_file:
       - backend/.env
+=======
+    
+>>>>>>> a932153a6d137f7b89ca5b1ee7f41750e4c3dc79
     depends_on:
       - db
 
