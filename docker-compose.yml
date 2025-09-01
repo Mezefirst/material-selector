@@ -1,5 +1,5 @@
-
 version: "3.8"
+
 services:
   backend:
     build: ./backend
@@ -9,12 +9,14 @@ services:
       - backend/.env
     depends_on:
       - db
+
   frontend:
     build: ./frontend
     ports:
       - "3000:80"
     depends_on:
       - backend
+
   db:
     image: postgres:15
     environment:
@@ -23,5 +25,7 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - db_data:/var/lib/postgresql/data
+
 volumes:
   db_data:
+
