@@ -7,4 +7,5 @@ scikit-learn
 pandas
 python-multipart
 pydantic
+numpy
 
