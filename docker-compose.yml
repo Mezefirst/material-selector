@@ -1,31 +1,5 @@
-version: '3.8'
+version: "3.8"
 
-services:
-  backend:
-    build: ./backend
-    ports:
-      - "8000:8000"
-    environment:
-      - ENV=development
-    volumes:
-      - ./backend:/app
-    restart: unless-stopped
-
-  frontend:
-    build: ./frontend
-    ports:
-      - "3000:80"
-    environment:
-      - REACT_APP_API_URL=http://localhost:8000
-    depends_on:
-      - backend
-    restart: unless-stopped
-
-networks:
-  default:
-    name: material-selector-network
-
-version: "3.9"
 services:
   backend:
     build: ./backend
@@ -35,12 +9,14 @@ services:
       - backend/.env
     depends_on:
       - db
+
   frontend:
     build: ./frontend
     ports:
       - "3000:80"
     depends_on:
       - backend
+
   db:
     image: postgres:15
     environment:
@@ -49,5 +25,7 @@ services:
       POSTGRES_PASSWORD: password
     volumes:
       - db_data:/var/lib/postgresql/data
+
 volumes:
   db_data:
+
