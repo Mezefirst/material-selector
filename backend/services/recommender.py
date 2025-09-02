@@ -1,14 +1,30 @@
 from typing import List, Dict
-# Import AI logic from ai_recommender.py (as previously discussed)
-from ai_recommender import filter_materials, find_alternatives, simulate_tradeoff
-import joblib
-import numpy as np
+import os
 
-# Load pre-trained models (assuming you have .joblib files)
-xgb_model = joblib.load("models/xgb_recommender.joblib")
-nn_model = joblib.load("models/nn_recommender.joblib")
+# Import AI logic from ai_recommender.py when models are available
+try:
+    from backend.ai_recommender import filter_materials, find_alternatives, simulate_tradeoff as ai_simulate_tradeoff
+    AI_AVAILABLE = True
+except ImportError:
+    AI_AVAILABLE = False
+
+# Optional ML model loading - only if models exist
+ML_MODELS_AVAILABLE = False
+try:
+    import joblib
+    import numpy as np
+    if os.path.exists("models/xgb_recommender.joblib") and os.path.exists("models/nn_recommender.joblib"):
+        xgb_model = joblib.load("models/xgb_recommender.joblib")
+        nn_model = joblib.load("models/nn_recommender.joblib")
+        ML_MODELS_AVAILABLE = True
+except (ImportError, FileNotFoundError):
+    pass
 
 def recommend_materials_ml(features, model_type="xgb"):
+    """ML-based recommendation - only available if models are loaded"""
+    if not ML_MODELS_AVAILABLE:
+        raise ValueError("ML models not available")
+    
     if model_type == "xgb":
         preds = xgb_model.predict(features)
     elif model_type == "nn":
@@ -17,65 +33,84 @@ def recommend_materials_ml(features, model_type="xgb"):
         raise ValueError("Unknown model type")
     return preds
 
-
-def recommend_materials(filters):
-    # Example: filter locally; replace with DB queries as needed
-    from backend.data.materials import MATERIALS
-    results = MATERIALS
+def recommend_materials(filters: Dict) -> List[Dict]:
+    """Main recommendation function with rule-based filtering"""
+    from data.materials import MATERIALS
+    results = MATERIALS.copy()
 
     # Filter by types
     if filters.get("types"):
         results = [m for m in results if m["type"] in filters["types"]]
+    
     # Filter by colors
     if filters.get("colors"):
         results = [m for m in results if m["color"] in filters["colors"]]
+    
     # Range filters
-    results = [m for m in results if filters.get("min_strength", 0) <= m["strength"] <= filters.get("max_strength", 2000)]
-    results = [m for m in results if filters.get("min_cost", 0) <= m["cost"] <= filters.get("max_cost", 1000)]
-    results = [m for m in results if filters.get("min_sustainability", 0) <= m["sustainability"] <= filters.get("max_sustainability", 10)]
+    min_strength = filters.get("min_strength", 0)
+    max_strength = filters.get("max_strength", 2000)
+    results = [m for m in results if min_strength <= m["strength"] <= max_strength]
+    
+    min_cost = filters.get("min_cost", 0)
+    max_cost = filters.get("max_cost", 1000)
+    results = [m for m in results if min_cost <= m["cost"] <= max_cost]
+    
+    min_sustainability = filters.get("min_sustainability", 0)
+    max_sustainability = filters.get("max_sustainability", 10)
+    results = [m for m in results if min_sustainability <= m["sustainability"] <= max_sustainability]
+    
     # Fuzzy search and full-text match
     if filters.get("search"):
         query = filters["search"].lower()
-        results = [m for m in results if query in m["name"].lower() or query in m.get("properties", "").lower() or query in m.get("description", "").lower()]
-    return results
+        results = [m for m in results if 
+                  query in m["name"].lower() or 
+                  query in m.get("properties", "").lower() or 
+                  query in m.get("description", "").lower()]
     
-from backend.services.nlp import parse_query_nlp
-
-def recommend_materials(filters, query=None, model_type="xgb"):
-    # NLP parsing
-    if query:
-        nlp_filters = parse_query_nlp(query)
-        filters.update(nlp_filters)
-    # Build feature vector from filters
-    features = np.array([filters.get("strength", 0), filters.get("cost", 0), filters.get("sustainability", 0)])
-    # ML-based recommendation
-    material_ids = recommend_materials_ml(features.reshape(1, -1), model_type)
-    # Retrieve material details
-    from backend.data.materials import MATERIALS
-    results = [m for m in MATERIALS if m["id"] in material_ids]
-    return results
+    # Use AI filtering if available
+    if AI_AVAILABLE and results:
+        try:
+            min_strength = filters.get("min_strength", 0)
+            max_cost = filters.get("max_cost", float("inf"))
+            min_sustainability = filters.get("min_sustainability", 0)
+            results = filter_materials(results, min_strength, max_cost, min_sustainability)
+        except Exception:
+            pass  # Fall back to rule-based results
     
-# Extend rule-based logic as needed    
-def recommend_materials(filters: Dict):
-    # Load materials from DB in a real implementation
-    materials = [
-        {"name": "Steel", "strength": 500, "cost": 2.0, "sustainability": 5},
-        {"name": "Aluminum", "strength": 300, "cost": 3.0, "sustainability": 7},
-        {"name": "Bamboo", "strength": 100, "cost": 1.0, "sustainability": 10}
-    ]
-    min_strength = filters.get("min_strength", 0)
-    max_cost = filters.get("max_cost", float("inf"))
-    min_sustainability = filters.get("min_sustainability", 0)
-    return filter_materials(materials, min_strength, max_cost, min_sustainability)
+    return results
 
-def suggest_alternatives(material: Dict):
-    # Load materials from DB in a real implementation
-    materials = [
-        {"name": "Steel", "strength": 500, "cost": 2.0, "sustainability": 5},
-        {"name": "Aluminum", "strength": 300, "cost": 3.0, "sustainability": 7},
-        {"name": "Bamboo", "strength": 100, "cost": 1.0, "sustainability": 10}
-    ]
-    return find_alternatives(materials, material)
+def suggest_alternatives(material: Dict) -> List[Dict]:
+    """Suggest alternative materials"""
+    from data.materials import MATERIALS
+    
+    if AI_AVAILABLE:
+        try:
+            return find_alternatives(MATERIALS, material, n_alts=3)
+        except Exception:
+            pass
+    
+    # Fallback: simple rule-based alternatives
+    alternatives = []
+    for m in MATERIALS:
+        if (m["name"] != material["name"] and 
+            abs(m["strength"] - material["strength"]) < 200 and
+            abs(m["sustainability"] - material["sustainability"]) < 3):
+            alternatives.append(m)
+    
+    return alternatives[:3]
 
-def simulate_tradeoff(material_a: Dict, material_b: Dict):
-    return simulate_tradeoff(material_a, material_b)
+def simulate_tradeoff(material_a: Dict, material_b: Dict) -> Dict:
+    """Simulate performance trade-offs between materials"""
+    if AI_AVAILABLE:
+        try:
+            return ai_simulate_tradeoff(material_a, material_b)
+        except Exception:
+            pass
+    
+    # Fallback: simple difference calculation
+    return {
+        "strength_diff": material_b["strength"] - material_a["strength"],
+        "cost_diff": material_b["cost"] - material_a["cost"],
+        "sustainability_diff": material_b["sustainability"] - material_a["sustainability"],
+        "recommendation": "Higher values indicate material_b performs better in that category"
+    }
